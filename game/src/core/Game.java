@@ -8,8 +8,6 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.ai.pfa.GraphPath;
-import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application;
-import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.Scaling;
@@ -43,7 +41,6 @@ import java.util.Optional;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 
-/** The heart of the framework. From here all strings are pulled. */
 public final class Game extends ScreenAdapter implements IOnLevelLoader {
 
     /**
@@ -63,45 +60,23 @@ public final class Game extends ScreenAdapter implements IOnLevelLoader {
      * @see LevelManager
      */
     private static ILevel currentLevel;
+
     /**
      * The width of the game window in pixels.
      *
-     * <p>Manipulating this value will only result in changes before {@link Game#run} was executed.
+     * <p>Manipulating this value will only result in changes before {@link Dungeon#run} was executed.
      */
     private static int WINDOW_WIDTH = 640;
-    /**
-     * Part of the pre-run configuration. The height of the game window in pixels.
-     *
-     * <p>Manipulating this value will only result in changes before {@link Game#run} was executed.
-     */
-    private static int WINDOW_HEIGHT = 480;
-    /**
-     * Part of the pre-run configuration. The fps of the game (frames per second)
-     *
-     * <p>Manipulating this value will only result in changes before {@link Game#run} was executed.
-     */
-    private static int FRAME_RATE = 30;
 
     /**
-     * Part of the pre-run configuration. If this value is true, the game will be started in full
-     * screen mode.
-     *
-     * <p>Manipulating this value will only result in changes before {@link Game#run} was executed.
+     * Part of the pre-run configuration. The height of the game window in pixels.
      */
-    private static boolean FULL_SCREEN = false;
+    private static int WINDOW_HEIGHT = 480;
 
     /**
      * Part of the pre-run configuration. The title of the Game-Window.
-     *
-     * <p>Manipulating this value will only result in changes before {@link Game#run} was executed.
      */
-    private static String WINDOW_TITLE = "PM-Dungeon";
-    /**
-     * Part of the pre-run configuration. The path (as String) to the logo of the Game-Window.
-     *
-     * <p>Manipulating this value will only result in changes before {@link Game#run} was executed.
-     */
-    private static String LOGO_PATH = "logo/CatLogo_35x35.png";
+
     /** Currently used level-size configuration for generating new level */
     private static LevelSize LEVELSIZE = LevelSize.SMALL;
     /**
@@ -120,13 +95,6 @@ public final class Game extends ScreenAdapter implements IOnLevelLoader {
      * <p>Will not replace {@link #onLevelLoad}
      */
     private static IVoidFunction userOnLevelLoad = () -> {};
-    /**
-     * Part of the pre-run configuration. If this value is true, the audio for the game will be
-     * disabled.
-     *
-     * <p>Manipulating this value will only result in changes before {@link Game#run} was executed.
-     */
-    private static boolean DISABLE_AUDIO = false;
 
     private static Entity hero;
 
@@ -145,8 +113,12 @@ public final class Game extends ScreenAdapter implements IOnLevelLoader {
     private boolean doSetup = true;
     private boolean uiDebugFlag = false;
 
+    private final Dungeon parent;
+
     // for singleton
-    private Game() {}
+    public Game(Dungeon dungeon) {
+        this.parent = dungeon;
+    }
 
     /**
      * @return the currently loaded level
@@ -168,42 +140,6 @@ public final class Game extends ScreenAdapter implements IOnLevelLoader {
     }
 
     /**
-     * Width of the game-window in pixel
-     *
-     * @return the width of the game-window im pixel
-     */
-    public static int windowWidth() {
-        return WINDOW_WIDTH;
-    }
-
-    /**
-     * Height of the game-window in pixel
-     *
-     * @return the height of the game-window im pixel
-     */
-    public static int windowHeight() {
-        return WINDOW_HEIGHT;
-    }
-
-    /**
-     * Get the current frame rate of the game
-     *
-     * @return current frame rate of the game
-     */
-    public static int frameRate() {
-        return FRAME_RATE;
-    }
-
-    /**
-     * Get if the game is currently in full screen mode
-     *
-     * @return true if the game is currently in full screen mode
-     */
-    public static boolean fullScreen() {
-        return FULL_SCREEN;
-    }
-
-    /**
      * The currently set level-Size.
      *
      * <p>This value is used for the generation of the next level.
@@ -214,77 +150,6 @@ public final class Game extends ScreenAdapter implements IOnLevelLoader {
      */
     public static LevelSize levelSize() {
         return LEVELSIZE;
-    }
-
-    /**
-     * Set the width of the game window in pixels.
-     *
-     * <p>Part of the pre-run configuration: Manipulating this value will only result in changes
-     * before {@link Game#run} was executed.
-     *
-     * @param windowWidth: the new width of the game window in pixels.
-     */
-    public static void windowWidth(int windowWidth) {
-        WINDOW_WIDTH = windowWidth;
-    }
-
-    /**
-     * Set the height of the game window in pixels.
-     *
-     * <p>Part of the pre-run configuration: Manipulating this value will only result in changes
-     * before {@link Game#run} was executed.
-     *
-     * @param windowHeight: the new height of the game window in pixels.
-     */
-    public static void windowHeight(int windowHeight) {
-        WINDOW_HEIGHT = windowHeight;
-    }
-
-    /**
-     * The frames per second of the game. The FPS determine in which interval the update cycle of
-     * the systems is triggered. Each system is updated once per frame. With an FPS of 30, each
-     * system is updated 30 times per second.
-     *
-     * <p>Part of the pre-run configuration: Manipulating this value will only result in changes
-     * before {@link Game#run} was executed.
-     *
-     * @param frameRate: the new fps of the game
-     */
-    public static void frameRate(int frameRate) {
-        FRAME_RATE = frameRate;
-    }
-
-    /**
-     * Set the window to fullscreen mode or windowed mode.
-     *
-     * @param fullscreen true for fullscreen, false for windowed
-     */
-    public static void fullScreen(boolean fullscreen) {
-        FULL_SCREEN = fullscreen;
-    }
-
-    /**
-     * Set the title of the game window.
-     *
-     * <p>Part of the pre-run configuration: Manipulating this value will only result in changes
-     * before {@link Game#run} was executed.
-     *
-     * @param windowTitle: new title
-     */
-    public static void windowTitle(String windowTitle) {
-        WINDOW_TITLE = windowTitle;
-    }
-
-    /**
-     * Set the path to the logo of the game window.
-     *
-     * <p>Part of the pre-run configuration: Manipulating this value will only result in changes
-     * before {@link Game#run} was executed.
-     *
-     * @param logoPath: path to the nwe logo as String
-     */
-    public static void logoPath(String logoPath) {
-        LOGO_PATH = logoPath;
     }
 
     /**
@@ -323,18 +188,6 @@ public final class Game extends ScreenAdapter implements IOnLevelLoader {
     }
 
     /**
-     * Set if you want to disable or enable the audi of the game.
-     *
-     * <p>Part of the pre-run configuration: Manipulating this value will only result in changes
-     * before {@link Game#run} was executed.
-     *
-     * @param disableAudio true if you want to disable the audio, false (default) if not.
-     */
-    public static void disableAudio(boolean disableAudio) {
-        DISABLE_AUDIO = disableAudio;
-    }
-
-    /**
      * In the next frame, each system will be informed that the given entity has changes in its
      * Component Collection.
      *
@@ -354,6 +207,42 @@ public final class Game extends ScreenAdapter implements IOnLevelLoader {
     public static void addEntity(Entity entity) {
         entities.add(entity);
         LOGGER.info("Entity: " + entity + " will be added to the Game.");
+    }
+
+    /**
+     * Width of the game-window in pixel
+     *
+     * @return the width of the game-window im pixel
+     */
+    public static int windowWidth() {
+        return WINDOW_WIDTH;
+    }
+
+    /**
+     * Height of the game-window in pixel
+     *
+     * @return the height of the game-window im pixel
+     */
+    public static int windowHeight() {
+        return WINDOW_HEIGHT;
+    }
+
+    /**
+     * Set the width of the game window in pixels.
+     *
+     * @param windowWidth: the new width of the game window in pixels.
+     */
+    public static void windowWidth(int windowWidth) {
+        WINDOW_WIDTH = windowWidth;
+    }
+
+    /**
+     * Set the height of the game window in pixels.
+     *
+     * @param windowHeight: the new height of the game window in pixels.
+     */
+    public static void windowHeight(int windowHeight) {
+        WINDOW_HEIGHT = windowHeight;
     }
 
     /**
@@ -405,37 +294,6 @@ public final class Game extends ScreenAdapter implements IOnLevelLoader {
      */
     public static void loadConfig(String pathAsString, Class<?>... klass) throws IOException {
         Configuration.loadAndGetConfiguration(pathAsString, klass);
-    }
-
-    /** Starts the dungeon and requires a {@link Game}. */
-    public static void run() {
-        Lwjgl3ApplicationConfiguration config = new Lwjgl3ApplicationConfiguration();
-        config.setWindowSizeLimits(WINDOW_WIDTH, WINDOW_HEIGHT, 9999, 9999);
-        // The third and fourth parameters ("maxWidth" and "maxHeight") affect the resizing
-        // behavior
-        // of the window. If the window is enlarged or maximized, then it can assume these
-        // dimensions at maximum. If you have a larger screen resolution than 9999x9999 pixels,
-        // increase these parameters.
-        config.setForegroundFPS(FRAME_RATE);
-        config.setTitle(WINDOW_TITLE);
-        config.setWindowIcon(LOGO_PATH);
-        config.disableAudio(DISABLE_AUDIO);
-
-        if (FULL_SCREEN) {
-            config.setFullscreenMode(Lwjgl3ApplicationConfiguration.getDisplayMode());
-        } else {
-            config.setWindowedMode(WINDOW_WIDTH, WINDOW_HEIGHT);
-        }
-
-        // uncomment this if you wish no audio
-        new Lwjgl3Application(
-                new com.badlogic.gdx.Game() {
-                    @Override
-                    public void create() {
-                        setScreen(new Game());
-                    }
-                },
-                config);
     }
 
     /**

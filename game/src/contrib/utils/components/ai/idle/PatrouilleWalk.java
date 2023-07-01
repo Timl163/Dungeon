@@ -4,6 +4,7 @@ import com.badlogic.gdx.ai.pfa.GraphPath;
 
 import contrib.utils.components.ai.AITools;
 
+import core.Dungeon;
 import core.Entity;
 import core.Game;
 import core.components.PositionComponent;
@@ -56,7 +57,7 @@ public class PatrouilleWalk implements Consumer<Entity> {
             final float radius, final int numberCheckpoints, final int pauseTime, final MODE mode) {
         this.radius = radius;
         this.numberCheckpoints = numberCheckpoints;
-        this.pauseFrames = pauseTime / (1000 / Game.frameRate());
+        this.pauseFrames = pauseTime / (1000 / Dungeon.frameRate());
         this.mode = mode;
     }
 
