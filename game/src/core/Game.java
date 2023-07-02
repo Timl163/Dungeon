@@ -113,11 +113,8 @@ public final class Game extends ScreenAdapter implements IOnLevelLoader {
     private boolean doSetup = true;
     private boolean uiDebugFlag = false;
 
-    private final Dungeon parent;
-
     // for singleton
-    public Game(Dungeon dungeon) {
-        this.parent = dungeon;
+    public Game() {
     }
 
     /**

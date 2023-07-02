@@ -2,6 +2,7 @@ package core;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.ScreenAdapter;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
@@ -15,23 +16,22 @@ import core.utils.Constants;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.ArrayList;
-import java.util.Optional;
 
 public class Menu extends ScreenAdapter {
 
-    private final Dungeon parent;
-    private final Stage stage = new Stage(new ScreenViewport());
-    private final Skin skin = new Skin(Gdx.files.internal(Constants.SKIN_FOR_DIALOG));
-    private final Table table = new Table();
-    private final TextButton buttonSinglePlayer = new TextButton("SinglePlayer", skin);
-    private final TextButton buttonMultiPlayer = new TextButton("MultiPlayer", skin);
-    private final TextButton buttonStartSession = new TextButton("Start session", skin);
-    private final TextButton buttonJoinSession = new TextButton("Join session", skin);
-    private final TextButton buttonExit = new TextButton("Exit", skin);
-    private final TextField inputHostIpPort = new TextField("", skin);
-    private final TextButton buttonJoin = new TextButton("Connect", skin);
-    private final Label textInvalidAddress = new Label("", skin);
-    private final ArrayList<IMenuScreenObserver> observers = new ArrayList<>();
+    private final Stage stage;
+    private final Skin skin;
+    private final Table table;
+    private final TextButton buttonSinglePlayer;
+    private final TextButton buttonMultiPlayer;
+    private final TextButton buttonStartNewSession;
+    private final TextButton buttonJoinExistingSession;
+    private final TextButton buttonExit;
+    private final TextButton buttonBack;
+    private final TextField inputHostIpPort;
+    private final TextButton buttonJoin;
+    private final Label textInvalidAddress;
+    private final ArrayList<IMenuScreenObserver> observers;
 
     private enum MenuType {
         GameModeChoice,
@@ -39,8 +39,23 @@ public class Menu extends ScreenAdapter {
         MultiplayerJoinSession
     }
 
-    public Menu(Dungeon dungeon) {
-        this.parent = dungeon;
+    public Menu() {
+        skin = new Skin(Gdx.files.internal(Constants.SKIN_FOR_DIALOG));
+        stage = new Stage(new ScreenViewport());
+        buttonSinglePlayer = new TextButton("SinglePlayer", skin);
+        buttonMultiPlayer = new TextButton("MultiPlayer", skin);
+        buttonStartNewSession = new TextButton("Start session", skin);
+        buttonJoinExistingSession = new TextButton("Join session", skin);
+        buttonExit = new TextButton("Exit", skin);
+        buttonBack = new TextButton("Back", skin);
+        inputHostIpPort = new TextField("", skin);
+        buttonJoin = new TextButton("Connect", skin);
+        textInvalidAddress = new Label("Invalid Address", skin);
+        textInvalidAddress.setColor(Color.RED);
+
+        table = new Table();
+
+        observers = new ArrayList<>();
     }
 
     @Override
@@ -48,7 +63,7 @@ public class Menu extends ScreenAdapter {
         Gdx.input.setInputProcessor(stage);
 
         table.setFillParent(true);
-        table.setDebug(true);
+//        table.setDebug(true);
         stage.addActor(table);
 
         setActiveMenu(MenuType.GameModeChoice);
@@ -64,20 +79,15 @@ public class Menu extends ScreenAdapter {
         // tell our stage to do actions and draw itself
         stage.act(Math.min(Gdx.graphics.getDeltaTime(), 1 / 30f));
         stage.draw();
-
-        // temp debug stuff
-        //parent.changeScreen(Box2DTutorial.APPLICATION);
     }
 
     @Override
     public void resize(int width, int height) {
-        // change the stage's viewport when teh screen size is changed
         stage.getViewport().update(width, height, true);
     }
 
     @Override
     public void dispose() {
-        // dispose of assets when not needed anymore
         stage.dispose();
     }
 
@@ -111,14 +121,14 @@ public class Menu extends ScreenAdapter {
             }
         });
 
-        buttonStartSession.addListener(new ChangeListener() {
+        buttonStartNewSession.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
                 observers.forEach((IMenuScreenObserver observer) -> observer.onMultiPlayerHostModeChosen());
             }
         });
 
-        buttonJoinSession.addListener(new ChangeListener() {
+        buttonJoinExistingSession.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
                 setActiveMenu(MenuType.MultiplayerJoinSession);
@@ -155,16 +165,19 @@ public class Menu extends ScreenAdapter {
                 table.add(buttonExit).fillX().uniformX();
             }
             case MultiplayerStartOrJoinSession -> {
-                table.add(buttonStartSession).fillX().uniformX();
+                table.add(buttonStartNewSession).fillX().uniformX();
                 table.row().pad(10, 0, 10, 0);
                 table.row();
-                table.add(buttonJoinSession).fillX().uniformX();
+                table.add(buttonJoinExistingSession).fillX().uniformX();
                 table.row().pad(10, 0, 10, 0);
                 table.row();
                 table.add(buttonExit).fillX().uniformX();
             }
             case MultiplayerJoinSession -> {
                 table.add(inputHostIpPort).fillX().uniformX();
+                table.row();
+                table.add(textInvalidAddress).fillX().uniformX();
+                textInvalidAddress.setVisible(false);
                 table.row().pad(10, 0, 10, 0);
                 table.row();
                 table.add(buttonJoin).fillX().uniformX();

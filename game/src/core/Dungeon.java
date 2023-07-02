@@ -71,10 +71,10 @@ public class Dungeon extends Game implements IMenuScreenObserver {
         Logger LOGGER = Logger.getLogger("Main");
         Debugger debugger = new Debugger();
 
-        menuScreen = new Menu(this);
+        menuScreen = new Menu();
         menuScreen.addListener(this);
 
-        gameScreen = new core.Game(this);
+        gameScreen = new core.Game();
         try {
             core.Game.hero(EntityFactory.newHero());
             core.Game.loadConfig(
