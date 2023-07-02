@@ -43,6 +43,7 @@ import java.util.stream.Stream;
 
 public final class Game extends ScreenAdapter implements IOnLevelLoader {
 
+    private static Game INSTANCE;
     /**
      * A Map with each {@link System} in the game.
      *
@@ -114,7 +115,7 @@ public final class Game extends ScreenAdapter implements IOnLevelLoader {
     private boolean uiDebugFlag = false;
 
     // for singleton
-    public Game() {
+    private Game() {
     }
 
     /**
@@ -590,6 +591,14 @@ public final class Game extends ScreenAdapter implements IOnLevelLoader {
         }
         hero().ifPresent(Game::addEntity);
         userOnLevelLoad.execute();
+    }
+
+    public static Game getInstance() {
+        if(INSTANCE == null) {
+            INSTANCE = new Game();
+        }
+
+        return INSTANCE;
     }
 
     /**

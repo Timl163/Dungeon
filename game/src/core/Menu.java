@@ -21,8 +21,12 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 
+/**
+ * Example menu to demonstrate Multiplayer mode.
+ */
 public class Menu extends ScreenAdapter {
 
+    private static Menu INSTANCE;
     private final Stage stage;
     private final Skin skin;
     private final Table table;
@@ -45,7 +49,8 @@ public class Menu extends ScreenAdapter {
         MultiplayerJoinSession
     }
 
-    public Menu() {
+    // for singleton
+    private Menu() {
         skin = new Skin(Gdx.files.internal(Constants.SKIN_FOR_DIALOG));
         stage = new Stage(new ScreenViewport());
         buttonSinglePlayer = new TextButton("SinglePlayer", skin);
@@ -63,6 +68,8 @@ public class Menu extends ScreenAdapter {
 
         observers = new ArrayList<>();
 
+        registerListeners();
+
         String tempDeviceIpAddress;
         try {
             tempDeviceIpAddress = InetAddress.getLocalHost().getHostAddress();
@@ -77,11 +84,9 @@ public class Menu extends ScreenAdapter {
         Gdx.input.setInputProcessor(stage);
 
         table.setFillParent(true);
-//        table.setDebug(true);
         stage.addActor(table);
 
         setActiveMenu(MenuType.GameModeChoice);
-        registerListeners();
     }
 
     @Override
@@ -111,6 +116,14 @@ public class Menu extends ScreenAdapter {
 
     public void removeListener(IMenuScreenObserver observer) {
         observers.remove(observer);
+    }
+
+    public static Menu getInstance() {
+        if(INSTANCE == null) {
+            INSTANCE = new Menu();
+        }
+
+        return INSTANCE;
     }
 
     private void registerListeners() {

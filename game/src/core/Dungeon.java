@@ -13,6 +13,10 @@ import core.utils.components.MissingComponentException;
 import java.io.IOException;
 import java.util.logging.Logger;
 
+/**
+ * Main entry of the game.
+ * Manages window and screens.
+ */
 public class Dungeon extends Game implements IMenuScreenObserver {
 
     /**
@@ -62,19 +66,15 @@ public class Dungeon extends Game implements IMenuScreenObserver {
     private Menu menuScreen;
     private core.Game gameScreen;
 
-
-    public final static int MENU = 0;
-    public final static int GAME = 1;
-
     @Override
     public void create() {
         Logger LOGGER = Logger.getLogger("Main");
         Debugger debugger = new Debugger();
 
-        menuScreen = new Menu();
+        menuScreen = Menu.getInstance();
         menuScreen.addListener(this);
 
-        gameScreen = new core.Game();
+        gameScreen = core.Game.getInstance();
         try {
             core.Game.hero(EntityFactory.newHero());
             core.Game.loadConfig(
