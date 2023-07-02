@@ -27,11 +27,12 @@ public class Menu extends ScreenAdapter {
     private final TextButton buttonStartNewSession;
     private final TextButton buttonJoinExistingSession;
     private final TextButton buttonExit;
-    private final TextButton buttonBack;
+    private final TextButton buttonNavigateBack;
     private final TextField inputHostIpPort;
     private final TextButton buttonJoin;
     private final Label textInvalidAddress;
     private final ArrayList<IMenuScreenObserver> observers;
+    private MenuType menuTypeCurrent;
 
     private enum MenuType {
         GameModeChoice,
@@ -47,7 +48,7 @@ public class Menu extends ScreenAdapter {
         buttonStartNewSession = new TextButton("Start session", skin);
         buttonJoinExistingSession = new TextButton("Join session", skin);
         buttonExit = new TextButton("Exit", skin);
-        buttonBack = new TextButton("Back", skin);
+        buttonNavigateBack = new TextButton("Back", skin);
         inputHostIpPort = new TextField("", skin);
         buttonJoin = new TextButton("Connect", skin);
         textInvalidAddress = new Label("Invalid Address", skin);
@@ -100,10 +101,17 @@ public class Menu extends ScreenAdapter {
     }
 
     private void registerListeners() {
-        buttonExit.addListener(new ChangeListener() {
+        buttonExit.addListener(new ClickListener() {
             @Override
-            public void changed(ChangeEvent event, Actor actor) {
+            public void clicked(InputEvent event, float x, float y) {
                 Gdx.app.exit();
+            }
+        });
+
+        buttonNavigateBack.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                navigateBack();
             }
         });
 
@@ -114,23 +122,23 @@ public class Menu extends ScreenAdapter {
             }
         });
 
-        buttonMultiPlayer.addListener(new ChangeListener() {
+        buttonMultiPlayer.addListener(new ClickListener() {
             @Override
-            public void changed(ChangeEvent event, Actor actor) {
+            public void clicked(InputEvent event, float x, float y){
                 setActiveMenu(MenuType.MultiplayerStartOrJoinSession);
             }
         });
 
-        buttonStartNewSession.addListener(new ChangeListener() {
+        buttonStartNewSession.addListener(new ClickListener() {
             @Override
-            public void changed(ChangeEvent event, Actor actor) {
+            public void clicked(InputEvent event, float x, float y) {
                 observers.forEach((IMenuScreenObserver observer) -> observer.onMultiPlayerHostModeChosen());
             }
         });
 
-        buttonJoinExistingSession.addListener(new ChangeListener() {
+        buttonJoinExistingSession.addListener(new ClickListener() {
             @Override
-            public void changed(ChangeEvent event, Actor actor) {
+            public void clicked(InputEvent event, float x, float y) {
                 setActiveMenu(MenuType.MultiplayerJoinSession);
             }
         });
@@ -163,6 +171,7 @@ public class Menu extends ScreenAdapter {
                 table.row().pad(10, 0, 10, 0);
                 table.row();
                 table.add(buttonExit).fillX().uniformX();
+                menuTypeCurrent = MenuType.GameModeChoice;
             }
             case MultiplayerStartOrJoinSession -> {
                 table.add(buttonStartNewSession).fillX().uniformX();
@@ -171,7 +180,8 @@ public class Menu extends ScreenAdapter {
                 table.add(buttonJoinExistingSession).fillX().uniformX();
                 table.row().pad(10, 0, 10, 0);
                 table.row();
-                table.add(buttonExit).fillX().uniformX();
+                table.add(buttonNavigateBack).fillX().uniformX();
+                menuTypeCurrent = MenuType.MultiplayerStartOrJoinSession;
             }
             case MultiplayerJoinSession -> {
                 table.add(inputHostIpPort).fillX().uniformX();
@@ -183,9 +193,17 @@ public class Menu extends ScreenAdapter {
                 table.add(buttonJoin).fillX().uniformX();
                 table.row().pad(10, 0, 10, 0);
                 table.row();
-                table.add(buttonExit).fillX().uniformX();
+                table.add(buttonNavigateBack).fillX().uniformX();
+                menuTypeCurrent = MenuType.MultiplayerJoinSession;
             }
             default -> throw new RuntimeException("Invalid menu type");
+        }
+    }
+
+    private void navigateBack() {
+        switch (menuTypeCurrent) {
+            case MultiplayerStartOrJoinSession ->setActiveMenu(MenuType.GameModeChoice);
+            case MultiplayerJoinSession -> setActiveMenu(MenuType.MultiplayerStartOrJoinSession);
         }
     }
 }
