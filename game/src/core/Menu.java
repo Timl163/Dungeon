@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
@@ -12,9 +13,12 @@ import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import core.utils.Constants;
+import core.utils.Point;
 
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 
 public class Menu extends ScreenAdapter {
@@ -32,6 +36,7 @@ public class Menu extends ScreenAdapter {
     private final TextButton buttonJoin;
     private final Label textInvalidAddress;
     private final ArrayList<IMenuScreenObserver> observers;
+    private final String deviceIpAddress;
     private MenuType menuTypeCurrent;
 
     private enum MenuType {
@@ -57,6 +62,14 @@ public class Menu extends ScreenAdapter {
         table = new Table();
 
         observers = new ArrayList<>();
+
+        String tempDeviceIpAddress;
+        try {
+            tempDeviceIpAddress = InetAddress.getLocalHost().getHostAddress();
+        } catch (UnknownHostException e) {
+            tempDeviceIpAddress = "???";
+        }
+        deviceIpAddress = tempDeviceIpAddress;
     }
 
     @Override
@@ -184,6 +197,7 @@ public class Menu extends ScreenAdapter {
                 menuTypeCurrent = MenuType.MultiplayerStartOrJoinSession;
             }
             case MultiplayerJoinSession -> {
+                inputHostIpPort.setText(String.format("%s:%d", deviceIpAddress, 25444));
                 table.add(inputHostIpPort).fillX().uniformX();
                 table.row();
                 table.add(textInvalidAddress).fillX().uniformX();
